@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 from .openai_service import summarize_user_log
 from ..models import DailyLog
+from sqlalchemy import func
+
 
 
 def generate_daily_summary(user_id: int, target_date, db):
