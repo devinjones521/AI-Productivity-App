@@ -13,6 +13,17 @@ load_dotenv()
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
+# 2. Main entry point of the app
+if __name__ == "__main__":
+    # Example daily log
+    user_log = "Today I woke up early, went for a run, finished my work tasks, but forgot to journal."
+
+    # Use OpenAI to summarize the log
+    ai_summary = summarize_user_log(user_log)
+
+    # Output the AI summary
+    print("\n=== AI Summary of Your Day ===")
+    print(ai_summary)
 
 # --- App title ---
 st.title("🧠 Productivity App")
