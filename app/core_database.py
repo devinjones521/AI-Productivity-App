@@ -29,3 +29,10 @@ def get_user_log_for_date(user_id: int, target_date, db: Session):
         func.date(DailyLog.created_at) == target_date
     ).first()
 
+# Function to create the database tables
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

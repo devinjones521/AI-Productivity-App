@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends,HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from .services.openai_service import summarize_user_log
-from .core_database import SessionLocal, engine
+from .core_database import SessionLocal, engine, get_db
 from .models import Base, DailyLog
 from datetime import date
 from .services.services import generate_daily_summary
@@ -59,10 +59,10 @@ def get_logs(limit: int = 10, db: Session = Depends(get_db)):
 
 # 8. Generate daily summary
 @app.post("/generate-summary")
-async def generate_summary(user_id: int):
+async def generate_summary(user_id: int, db: Session = Depends(get_db)):
     try:
         today = date.today()
-        summary = generate_daily_summary(user_id=user_id, target_date=today)
+        summary = generate_daily_summary(user_id=user_id, target_date=today, db=db)
         return {"summary": summary}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
