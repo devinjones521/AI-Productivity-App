@@ -1,10 +1,12 @@
 # 1. Imports
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends,HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from services.openai_service import summarize_user_log
 from database import SessionLocal, engine
 from models import Base, DailyLog
+from datetime import date
+from services import generate_daily_summary
 
 # 2. Database setup
 Base.metadata.create_all(bind=engine)
@@ -55,4 +57,12 @@ def get_logs(limit: int = 10, db: Session = Depends(get_db)):
         for log in logs
     ]
 
-
+# 8. Generate daily summary
+@app.post("/generate-summary")
+async def generate_summary(user_id: int):
+    try:
+        today = date.today()
+        summary = generate_daily_summary(user_id=user_id, target_date=today)
+        return {"summary": summary}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
