@@ -64,6 +64,35 @@ st.subheader("Current Habits:")
 c.execute("SELECT habit_name, created_at FROM habits")
 habits = c.fetchall()
 
+# --- Daily Summary Section ---
+
+st.subheader("📊 Daily Summary")
+
+today = datetime.date.today()
+
+# Total number of habits
+c.execute("SELECT COUNT(*) FROM habits")
+total_habits = c.fetchone()[0]
+
+# Total number of habits completed today
+c.execute('''
+    SELECT COUNT(DISTINCT habit_id) FROM habit_logs
+    WHERE log_date = ?
+''', (today,))
+completed_habits = c.fetchone()[0]
+
+# Calculate success rate
+if total_habits > 0:
+    success_rate = (completed_habits / total_habits) * 100
+else:
+    success_rate = 0
+
+# Display results
+st.metric(label="Total Habits", value=total_habits)
+st.metric(label="Completed Today", value=completed_habits)
+st.metric(label="Success Rate", value=f"{success_rate:.0f}%")
+
+
 # --- Show current habits with completion checkboxes ---
 if habits:
     today = datetime.date.today()
@@ -89,13 +118,25 @@ if habits:
         completed = st.checkbox(f"{habit_name}", key=habit_name, value=completed_today)
 
         if completed and not completed_today:
-            # Insert a log ONLY if it wasn't already completed today
+            # Insert a log if it wasn't already completed today
             c.execute('''
                 INSERT INTO habit_logs (habit_id, log_date) VALUES (?, ?)
             ''', (habit_id, today))
             conn.commit()
             st.success(f"Marked {habit_name} as completed today!")
             st.rerun()
+
+        elif not completed and completed_today:
+            # Delete the log if it was previously completed but now unticked
+            c.execute('''
+                DELETE FROM habit_logs
+                WHERE habit_id = ?
+                AND log_date = ?
+            ''', (habit_id, today))
+            conn.commit()
+            st.warning(f"Unmarked {habit_name} as completed today.")
+            st.rerun()
+
 else:
     st.write("No habits added yet.")
 
