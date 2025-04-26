@@ -4,6 +4,14 @@ import streamlit as st
 import sqlite3
 import os
 import datetime
+from dotenv import load_dotenv
+import os
+from services.openai_service import summarize_user_log
+
+
+load_dotenv()
+
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 
 # --- App title ---
