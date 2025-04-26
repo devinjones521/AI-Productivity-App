@@ -2,11 +2,11 @@
 from fastapi import FastAPI, Depends,HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from services.openai_service import summarize_user_log
-from database import SessionLocal, engine
-from models import Base, DailyLog
+from .services.openai_service import summarize_user_log
+from .core_database import SessionLocal, engine
+from .models import Base, DailyLog
 from datetime import date
-from services import generate_daily_summary
+from .services.services import generate_daily_summary
 
 # 2. Database setup
 Base.metadata.create_all(bind=engine)
@@ -66,3 +66,16 @@ async def generate_summary(user_id: int):
         return {"summary": summary}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# 9. Submit daily log
+@app.post("/submit-daily-log")
+async def submit_daily_log(user_id: int, user_log: str, ai_summary: str, db: Session = Depends(get_db)):
+    new_log = DailyLog(
+        user_id=user_id,
+        user_log=user_log,
+        ai_summary=ai_summary
+    )
+    db.add(new_log)
+    db.commit()
+    db.refresh(new_log)
+    return {"message": "Daily log submitted successfully", "log_id": new_log.id}
