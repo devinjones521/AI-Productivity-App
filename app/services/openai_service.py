@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -24,4 +25,5 @@ def summarize_user_log(log_text):
         )
         return response.choices[0].message.content
     except Exception as e:
-        return f"Error during summarization: {str(e)}"
+        # 🔥 Raise clean API exception
+        raise HTTPException(status_code=500, detail=f"OpenAI summarization failed: {str(e)}")
