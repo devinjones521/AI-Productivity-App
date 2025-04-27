@@ -18,6 +18,7 @@ def summarize_log(request: DailyLogRequest, db: Session = Depends(get_db)):
 
     # Create a new DailyLog record
     db_log = DailyLog(
+        user_id=request.user_id,
         user_log=request.log_text,
         ai_summary=ai_summary
     )
