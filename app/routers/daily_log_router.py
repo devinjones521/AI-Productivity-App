@@ -65,3 +65,9 @@ async def submit_daily_log(user_id: int, user_log: str, ai_summary: str, db: Ses
     db.commit()
     db.refresh(new_log)
     return {"message": "Daily log submitted successfully", "log_id": new_log.id}
+
+#simple health check endpoint
+@router.get("/health")
+def health_check():
+    return {"status": "ok"}
+
